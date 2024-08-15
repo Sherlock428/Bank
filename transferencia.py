@@ -1,6 +1,7 @@
 from usuario import  Transacao
 from sistema_login import usuarios_cadastrados
 import os
+import random
 
 def transferir(user):
     os.system('cls')
@@ -55,7 +56,7 @@ CPF: {u.cpf}
                     return
     except (ValueError, TypeError):
         print("ERROR: Digite um valor válido")
-        input("[Enter] -> Retornar ao Menu")
+        input("[Enter] -> Retornar ao Menu 2")
 
     print("Chave não encontrada. Transação cancelada")
 def historico_transferencia(user):
@@ -68,7 +69,6 @@ def historico_transferencia(user):
         print(f"{t}")
         print('-' * 30)
     
-    input("[Enter] -> Retornar ao Menu")
 
 def cadastrar_chave(user):
     print(f"""
@@ -78,6 +78,7 @@ def cadastrar_chave(user):
 
 [1] Chave CPF
 [2] Chave Aleatoria
+[3] Minhas Chaves
 """)
     
     option = int(input("Selecione chave que deseja Cadastrar: "))
@@ -95,4 +96,28 @@ def cadastrar_chave(user):
 
     
     elif option == 2:
-        pass
+        chave = chave_aleatoria()
+        user.chaves.append(chave)
+        print(f"Chave Aleatoria Gerada: {chave}")
+
+    
+    elif option == 3:
+
+        for c in user.chaves:
+            print(c)
+
+
+def chave_aleatoria():
+    conjunto = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+                "0","1","2","3","4","5","6","7","8","9",
+                "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z",]
+    
+    chave = []
+
+    for c in range(11):
+        letra_random = random.choice(conjunto)
+        chave.append(letra_random)
+
+    chave_formatada = ''.join(chave)
+
+    return chave_formatada

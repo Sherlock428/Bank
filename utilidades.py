@@ -1,6 +1,7 @@
-from usuario import Usuario
+from database import Usuario
 from transferencia import historico_transferencia, transferir, cadastrar_chave
 import os
+from decimal import Decimal, InvalidOperation
 
 def sacar(user):
     os.system('cls')
@@ -10,7 +11,7 @@ def sacar(user):
 {'=' * 30}
 """)
     try:
-        saque = float(input("Qual valor deseja sacar: "))
+        saque = Decimal(input("Qual valor deseja sacar: "))
 
         if saque <= user.credito:
             user.credito -= saque
@@ -18,8 +19,8 @@ def sacar(user):
 
         else:
             print("Você não tem o valor suficiente para realizar o saque")
-    except (ValueError, TypeError):
-        print("Digite um valor válido")
+    except (ValueError, TypeError, InvalidOperation):
+        print("ERROR: Digite um valor válido")
         
     input("[Enter] -> Retornar ao Menu")
 
@@ -32,13 +33,17 @@ def depositar(user):
 {'=' * 30}
 """)
     try:
-        deposit = float(input("Qual valor deseja depositar: "))
-
+        deposit = Decimal(input("Qual valor deseja depositar: "))
+        print(deposit)
         if deposit > 0:
-            user.credito += deposit
+            print("indo")
+            user.credito = user.credito + deposit
             print(f"Você depositou R${deposit:.2f} em sua conta, seu saldo atual é de {user.credito:.2f}")
-    except (ValueError, TypeError):
-        print("ERROR: Digite um valor válido")
+            print('foi')
+            user.save()
+    except (ValueError, TypeError, Exception) as e:
+        print(f"ERROR: Digite um valor válido")
+        input("[Enter] -> Retornar ao Menu")
 
 def area_transferencia(user):
     os.system('cls')
@@ -63,15 +68,14 @@ def area_transferencia(user):
         elif opcao == 3:
             cadastrar_chave(user)
     
-    except (ValueError, TypeError):
-        print("ERROR:")
+    except (ValueError, TypeError, Exception) as e:
+        print(f"ERROR: Selecione apenas uma das opções {e}")
 
     input("[Enter] -> Retornar ao Menu")
 
 def ui_user(user):
 
     ver_saldo = False
-    mostrar_saldo = "_____"
     while True:
 
         if not user:
@@ -79,11 +83,15 @@ def ui_user(user):
             input("[Enter] -> Retonar ao Menu")
             return
 
-        
+        if ver_saldo:
+            mostrar_saldo = f'{user.credito:.2f}'
+        else:
+            mostrar_saldo = '______'
         print(f"""
 {'=' * 30}
 {'BANCO NEWSTER'.center(30)}
 {'=' * 30}
+{user.nome}
 {f'Saldo: R${mostrar_saldo}'}
 {'-' * 30}
 
@@ -98,13 +106,7 @@ def ui_user(user):
             opcao = int(input("Escolha uma opção: "))
 
             if opcao == 1:
-                if ver_saldo == True:
-                    mostrar_saldo = "_____"
-                    ver_saldo = False
-                
-                elif ver_saldo == False:
-                    mostrar_saldo = f'{user.credito:.2f}'
-                    ver_saldo = True
+                ver_saldo = not ver_saldo
             elif opcao == 2:
                 sacar(user)
             elif opcao == 3:

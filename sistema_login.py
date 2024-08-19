@@ -1,7 +1,7 @@
-from usuario import Usuario
+from database import Usuario, Chaves
+from peewee import DoesNotExist
 import os
 
-usuarios_cadastrados = [Usuario(nome='teste', cpf=1, senha='123456', credito=10000, chaves=[], historico=[]), Usuario(nome='Y', cpf=2, senha='123456', credito=0, chaves=['2'], historico=[])]
 
 def cadastrar_usuario():
     try:
@@ -13,6 +13,7 @@ def cadastrar_usuario():
 """)
         nome = input("Digite seu nome: ")
         cpf  = int(input("Digite seu cpf: "))
+        email = input("Digite Seu Email: ")
         senha = input("Digite sua senha: ")
 
         while len(senha) < 6:
@@ -24,9 +25,11 @@ def cadastrar_usuario():
             senha = input("Digite sua senha: ")
             confirmar_senha = input("Confirme sua senha: ")
 
-        novo_usuario = Usuario(nome=nome, cpf=cpf, senha=senha, credito=0, chaves=[])
-        usuarios_cadastrados.append(novo_usuario)
-        print(f"usuarios cadastrados {usuarios_cadastrados}")
+        novo_usuario = Usuario.create(nome=nome, email=email, cpf=cpf, senha=senha)
+        
+        chaves = Chaves.create(usuario=novo_usuario)
+        
+        print(f"usuario cadastrado {novo_usuario} ")
     except Exception as e:
         print(f"ERROR: {e} ")
 
@@ -37,15 +40,19 @@ def login():
 {'LOGIN'.center(30)}
 {'=' * 30}
 """)
-    cpf = int(input("Digite o seu cpf: "))
-    senha = input("Digite sua senha: ")
+    try:
+        cpf = int(input("Digite o seu cpf: "))
+        senha = input("Digite sua senha: ")
 
-    for u in usuarios_cadastrados:
-        if cpf == u.cpf and senha == u.senha:
-            print(f"Usuario {u.nome}, encontrado!")
-            return u
+        usuario = Usuario.get(Usuario.cpf == cpf, Usuario.senha == senha)
 
+        if usuario:
+            return usuario
     
-    print("Usuario Não encontrado")
-    return None
+    except DoesNotExist:
+        print("Usuario Não encontrado")
+        input("[Enter] -> Retornar ao Menu")
+    except (ValueError, TypeError):
+        print("ERROR: CPF deve ser apenas numeros")
+        input("[Enter] -> Retornar ao Menu")
 
